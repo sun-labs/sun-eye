@@ -2,8 +2,13 @@
 
 import boto
 import sys, os
-from boto.s3.key import Key
-from boto.exception import S3ResponseError
+from minio import Minio
+from minio.error import ResponseError
+
+minioClient = Minio('***REMOVED***',
+                  access_key='***REMOVED***',
+                  secret_key='***REMOVED***',
+                  secure=False)
 
 
 DOWNLOAD_LOCATION_PATH = os.path.expanduser("~") + "***REMOVED***"
@@ -13,34 +18,22 @@ if not os.path.exists(DOWNLOAD_LOCATION_PATH):
 
 
 def backup_s3_folder():
-	BUCKET_NAME = "skypicturesbluefilter"
-	AWS_ACCESS_KEY_ID= os.getenv("AWS_KEY_ID") # set your AWS_KEY_ID  on your environment path
-	AWS_ACCESS_SECRET_KEY = os.getenv("AWS_ACCESS_KEY") # set your AWS_ACCESS_KEY  on your environment path
-	conn  = boto.connect_s3(AWS_ACCESS_KEY_ID, AWS_ACCESS_SECRET_KEY)
-	bucket = conn.get_bucket(BUCKET_NAME)
+	BUCKET_NAME = "***REMOVED***"
+	# AWS_ACCESS_KEY_ID= os.getenv("AWS_KEY_ID") # set your AWS_KEY_ID  on your environment path
+	# AWS_ACCESS_SECRET_KEY = os.getenv("AWS_ACCESS_KEY") # set your AWS_ACCESS_KEY  on your environment path
+	bucket = minioClient.list_objects(BUCKET_NAME, recursive=True)
 
-	#goto through the list of files
-	bucket_list = bucket.list()
+	for l in bucket:
+		key_string = str(l.object_name)
+		s3_path = DOWNLOAD_LOCATION_PATH + key_string # NOTE this is the path where the data will end up on our computer
+		# try:
+		print ("Current File is ", s3_path)
 
-	for l in bucket_list:
-		key_string = str(l.key)
-		s3_path = DOWNLOAD_LOCATION_PATH + key_string
 		try:
-			print ("Current File is ", s3_path)
-			l.get_contents_to_filename(s3_path)
-			l.delete()
-		except (OSError,S3ResponseError) as e:
-			pass
-			# check if the file has been downloaded locally
-			if not os.path.exists(s3_path):
-				try:
-					os.makedirs(s3_path)
-				except OSError as exc:
-					# let guard againts race conditions
-					import errno
-					if exc.errno != errno.EEXIST:
-						raise
-
+				minioClient.fget_object(BUCKET_NAME, l.object_name, s3_path)
+				# minioClient.remove_object(BUCKET_NAME, l.object_name) # NOTE uncomment this to remove the img when we download
+		except ResponseError as err:
+				print(err)
 
 
 

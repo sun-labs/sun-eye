@@ -1,4 +1,4 @@
-image_settings:
+mage_settings:
     horizontal_res: 960
     vertical_res: 540
     file_extension: '.jpg'

@@ -3,9 +3,18 @@ from datetime import datetime
 from time import sleep
 import picamera
 import os
-import tinys3
 import yaml
 import datetime
+from minio import Minio
+from minio.error import (ResponseError, BucketAlreadyOwnedByYou,
+                         BucketAlreadyExists)
+
+# Initialize minioClient with an endpoint and access/secret keys.
+minioClient = Minio('***REMOVED***',
+                    access_key='***REMOVED***',
+                    secret_key='***REMOVED***',
+                    secure=False)
+
 
 # testing
 with open("config.yml", 'r') as ymlfile:
@@ -23,11 +32,6 @@ camera = picamera.PiCamera()
 camera.resolution = (image_width, image_height)
 camera.awb_mode = cfg['image_settings']['awb_mode']
 
-#s3
-BUCKET_NAME = os.getenv("AWS_BUCKET_NAME") ) # set your AWS_BUCKET_NAME on your environment path
-AWS_ACCESS_KEY_ID= os.getenv("AWS_KEY_ID") # set your AWS_KEY_ID  on your environment path
-AWS_ACCESS_SECRET_KEY = os.getenv("AWS_ACCESS_KEY") # set your AWS_ACCESS_KEY  on your environment path
-
 # verify image folder exists and create if it does not
 if not os.path.exists(image_folder):
     os.makedirs(image_folder)
@@ -38,7 +42,8 @@ sleep(2)
 # endlessly capture images awwyiss
 while True:
     # Build filename string
-    filepath = image_folder + '/' + str(datetime.datetime.utcnow().replace(microsecond=0)) + file_extension
+    filename = str(datetime.datetime.utcnow().replace(microsecond=0)) + file_extension
+    filepath = image_folder + '/' + filename
 
     if cfg['debug'] == True:
         print ('[debug] Taking photo and saving to path ' + filepath)
@@ -50,12 +55,7 @@ while True:
         print ('[debug] Uploading ' + filepath + ' to s3')
 
     # Upload to S3
-    conn = tinys3.Connection(AWS_ACCESS_KEY_ID, AWS_ACCESS_SECRET_KEY)
-    f = open(filepath, 'rb')
-    conn.upload(filepath, f, BUCKET_NAME,
-               headers={
-               'x-amz-meta-cache-control': 'max-age=60'
-               })
+    conn = minioClient.fput_object('***REMOVED***', filename, filepath)
 
     # Cleanup
     if os.path.exists(filepath):
