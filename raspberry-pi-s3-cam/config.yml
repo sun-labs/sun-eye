@@ -1,9 +1,0 @@
-mage_settings:
-    horizontal_res: 960
-    vertical_res: 540
-    file_extension: '.jpg'
-    folder_name: 'images'
-    awb_mode: 'auto'
-    photo_interval: 10
-
-debug: false
