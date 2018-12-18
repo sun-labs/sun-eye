@@ -44,3 +44,9 @@ html, body, #root {
     color: gray;
     display: inline;
 }
+
+@media screen and (max-width: 512px) {
+    .app {
+        flex-direction: column;
+    }
+}
