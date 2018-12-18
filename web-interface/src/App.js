@@ -8,9 +8,22 @@ class App extends Component {
     super()
     this.state = {
       mc: undefined,
-      latestImage: {},
+      records: {},
       loop: false,
       sampleTime: 15000
+    }
+  }
+  getImageUrl(record) {
+    // ***REMOVED***
+    const { path } = this.getRecordInfo(record)
+    return `http://***REMOVED***/***REMOVED***/${path}`
+  }
+  getRecordInfo(record) {
+    const path = unescape(record.s3.object.key)
+    const deviceName = path.split('/')[0]
+    return {
+      path,
+      deviceName
     }
   }
   componentWillMount() {
@@ -21,64 +34,42 @@ class App extends Component {
       accessKey: '***REMOVED***',
       secretKey: '***REMOVED***'
     })
-    this.setState({ mc }, this.fetchLatestImages)
-    // const stream = mc.listObjects('***REMOVED***','', true)
-    // stream.on('data', this.handleData.bind(this))
-    // stream.on('error', this.handleError.bind(this))
-    // var listener = mc.listenBucketNotification('***REMOVED***', '/***REMOVED***/2018/12/18/', '.jpg', ['s3:ObjectCreated:*'])
-    // listener.on('notification', this.handleData.bind(this))
-  }
-  fetchLatestImages(device, date) {
-    const bucketName = '***REMOVED***'
-    const devices = device ? [device] : ['***REMOVED***', '***REMOVED***', '***REMOVED***']
-    const currentDate = !date 
-      ? this.convertDateToUTC(new Date()) 
-      : new Date(date)
-    const { mc, sampleTime, loop } = this.state
-    devices.forEach((deviceName) => {
-      let prefix = `${deviceName}/${currentDate.getFullYear()}/${currentDate.getMonth() + 1}/${currentDate.getDate()}/`
-      prefix = date ?  prefix + `${currentDate.getHours()}${currentDate.getMinutes()}` : prefix
-      const stream = mc.listObjects(bucketName, prefix, false)
-      stream.on('data', (obj) => {
-        this.handleData(deviceName, obj)
-      })
-      stream.on('error', this.handleError.bind(this))
-      if (!loop) { // warm up
-        setTimeout(() => {
-          this.setState({
-            loop: true,
-          })
-        }, sampleTime)
-      }
-    })
-  }
-  handleData(deviceName, obj) {
-    const { latestImage } = this.state
-    const { name, lastModified } = obj
-    if (!latestImage[deviceName]) {
-      latestImage[deviceName] = obj
-    }
-    const currentImage = latestImage[deviceName]
-    if (currentImage.lastModified < lastModified) {
-      latestImage[deviceName] = obj
-    }
-    this.setState({ latestImage })
 
-    setTimeout(() => {
-      this.fetchLatestImages(deviceName, latestImage.lastModified)
-    }, 15000)
+    let poller = mc.listenBucketNotification('***REMOVED***', '', '', ['s3:ObjectCreated:*'])
+    poller.on('notification', record => {
+      const { deviceName } = this.getRecordInfo(record)
+      this.setState({
+        records: {
+          ...this.state.records,
+          [deviceName]: record
+        }
+      })
+      // console.log(path, deviceName)
+      console.log(record)
+      // // console.log('New object: %s/%s (size: %d)', record.s3.bucket.name, record.s3.object.key, record.s3.object.size)
+    })
+    this.setState({ mc })
   }
-  handleError = console.error
-  convertDateToUTC(date) {
-    return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds()); 
+  formatDate(dateString) {
+    const date = new Date(dateString)
+    const options = { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }
+    return date.toLocaleDateString('sv-SE', options)
   }
   render() {
-    const devices = Object.keys(this.state.latestImage)
+    const devices = Object.keys(this.state.records).sort()
     return (
-      <div className="App">
+      <div className="app">
         { devices.map((deviceName) => {
-
-          return <p>{`hello`}</p>
+          const record = this.state.records[deviceName]
+          const imageSrc = this.getImageUrl(record)
+          return <div key={imageSrc} className="device-photo" style={{
+            backgroundImage: `url('${imageSrc}')`,
+          }}>
+            <div className='title-wrapper'>
+              <p className='title'>{ deviceName }</p>
+              <p className='timestamp'>{ this.formatDate(record.eventTime) }</p>
+            </div>
+            </div>
         })}
       </div>
     );
