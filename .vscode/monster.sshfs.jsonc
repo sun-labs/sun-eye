@@ -1,0 +1,14 @@
+/* 
+    - Install SSH FS in package manager
+    - Run `make monster.connect` in the-sky
+    - Configure SSH FS with these settings
+    - Change username and root accordingly
+*/
+{
+    "label": "***REMOVED***",
+    "root": "/home/***REMOVED***/Development/sun-eye",
+    "host": "localhost",
+    "port": 9865,
+    "username": "***REMOVED***",
+    "password": true
+}
