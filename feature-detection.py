@@ -8,6 +8,7 @@ import sys
 WIDTH = 640 
 HEIGHT = 360
 WIN_NAME = 'image'
+WIN_NAME_B = 'features'
 
 class Frame():
     def __init__(self, img):
@@ -50,7 +51,7 @@ def match_frames(f1, f2):
     bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
     matches = bf.match(des1,des2)
     img3 = None
-    img3 = cv2.drawMatches(img1,kp1,img2,kp2,matches[:10], flags=2, outImg=img3)
+    img3 = cv2.drawMatches(img1,kp1,img2,kp2,matches[:], flags=2, outImg=img3)
     return img3
 
 
@@ -59,6 +60,8 @@ def match_frames(f1, f2):
 def initWindow():
     cv2.namedWindow(WIN_NAME, cv2.WINDOW_NORMAL)
     cv2.resizeWindow(WIN_NAME, WIDTH, HEIGHT)
+    cv2.namedWindow(WIN_NAME_B, cv2.WINDOW_NORMAL)
+    cv2.resizeWindow(WIN_NAME_B, WIDTH, HEIGHT)
 
 
 if __name__ == "__main__":
@@ -71,6 +74,7 @@ if __name__ == "__main__":
         ret, frame = cap.read()
         if ret is True:
             img, cf = processImage(frame)
+            cv2.imshow(WIN_NAME_B, img)
             if pf is not None:
                 img = match_frames(cf, pf)
             pf = cf
