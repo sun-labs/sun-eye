@@ -62,10 +62,21 @@ def processClouds(img, frame, pc=None, pl=None):
     ret, thresh = cv2.threshold(gray, 0, 255, ttype)
 
     kernel = np.ones((3,3), np.uint8)
-    img = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=2)
+    bimg = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=2)
 
-    img = cv2.Canny(img, 1, 1)
+    # img = cv2.Canny(bimg, 1, 1)
 
+    contours,h = cv2.findContours(bimg, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    for cnt in contours:
+        cv2.drawContours(img,[cnt],0,(0,0,255),2)
+
+
+   #  print(list(map(lambda x: len(x), contours)))
+
+    clouds = len(list(filter(lambda x: len(x) > 30, contours)))
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    cv2.putText(img,str(clouds),(10,500), font, 4,(255,255,255),2,cv2.LINE_AA)
+    # img = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE, (0,0))
     # lines = cv2.HoughLines(opening, np.pi/180, 80, 30, 10)
 
     # if lines is not None:
