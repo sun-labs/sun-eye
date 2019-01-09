@@ -58,13 +58,44 @@ def match_frames(f1, f2):
 
 def processClouds(img, frame, pc=None, pl=None):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    ttype = cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU
+    ttype = cv2.THRESH_BINARY + cv2.THRESH_OTSU
     ret, thresh = cv2.threshold(gray, 0, 255, ttype)
-    
-    kernel = np.ones((3,3), np.uint8)
-    opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=2)
 
-    return opening, None, None, None
+    kernel = np.ones((3,3), np.uint8)
+    img = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=2)
+
+    img = cv2.Canny(img, 1, 1)
+
+    # lines = cv2.HoughLines(opening, np.pi/180, 80, 30, 10)
+
+    # if lines is not None:
+    #     for i1 in range(len(lines)):
+    #         x, y = lines[i1]
+    #         img = cv2.line(img, x, y, (255, 0, 0))
+
+    #img, contours, h = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    #markers = cv2.connectedComponents(opening)
+    #markers = cv2.watershed(img)
+
+    #sure_bg = cv2.dilate(opening, kernel, iterations=2)
+
+    #dist_transform = cv2.distanceTransform(opening, cv2.DIST_L2, 5)
+
+    #ret, sure_fg = cv2.threshold(dist_transform, 5, 255, cv2.THRESH_BINARY_INV)
+    #sure_fg = np.uint8(sure_fg)
+
+    #unknown = cv2.subtract(np.zeros(len(sure_fg)), sure_fg)
+
+    #ret, markers = cv2.connectedComponents(sure_fg)
+    #markers = markers+ 1
+    #markers[unknown == 255] = 0
+
+    # cv2.applyColorMap(markers, cv2.COLORMAP_AUTUMN)
+
+    #markers = cv2.watershed(img, markers)
+    # img[markers == -1] = [255, 128, 0]
+
+    return img, None, None, None
 
 def processClouds_kmeans(img, frame, pc = None, pl = None):
     img = cv2.resize(img, (WIDTH, HEIGHT))
