@@ -8,8 +8,12 @@ WORKDIR /***REMOVED***
 RUN apt-get update -y
 RUN apt-get update
 
+# GOOD STUFF
 RUN apt-get install tmux -y
 RUN apt-get install wget -y
+RUN apt-get install psmisc -y
+RUN apt-get install sudo -y
+
 RUN apt-get install python3-dev -y
 RUN apt-get install python3-pip -y
 
