@@ -56,7 +56,7 @@ def match_frames(f1, f2):
     img3 = cv2.drawMatches(img1,kp1,img2,kp2,matches[:], flags=2, outImg=img3)
     return img3
 
-def processClouds(img, frame, labels = None):
+def processClouds(img, frame, pc = None):
     img = cv2.resize(img, (WIDTH, HEIGHT))
     
     # print(frame.pts)
@@ -64,7 +64,7 @@ def processClouds(img, frame, labels = None):
     #Z = pts.reshape(-1, 2)
     #Z = Z.flatten()
     # print(Z)
-    (ret, label, centroid) = cv2.kmeans(pts, 4, None, (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 5, 1.0), 5, cv2.KMEANS_RANDOM_CENTERS)
+    (ret, label, centroid) = cv2.kmeans(pts, 4, None, (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 5, 1.0), 5, cv2.KMEANS_RANDOM_CENTERS, centers=pc)
     centroid = np.uint8(centroid)
     res = centroid[label.flatten()]
     # print(label)
@@ -75,7 +75,7 @@ def processClouds(img, frame, labels = None):
         u1, v1 = (int(round(p[0])), int(round(p[1])))
         cv2.circle(img, (u1, v1), 3, color)
 
-    return img, None, labels
+    return img, None, centroid
     
     Z = img.reshape((-1, 3))
     Z = np.float32(Z)
@@ -106,14 +106,14 @@ if __name__ == "__main__":
     initWindow()
     cap = cv2.VideoCapture(sys.argv[1])
     
-    pf = None#previous frame
-    pl = None #previous labels kmeans
+    pf = None #previous frame
+    pc = None #previous centroids kmeans
     while cap.isOpened():
         ret, frame = cap.read()
         if ret is True:
             img, cf = processImage(frame)
-            imgCloud, cfCloud, labels = processClouds(frame, cf, pl)
-            pl = labels
+            imgCloud, cfCloud, centroids = processClouds(frame, cf, pc)
+            pc = centroids
             cv2.imshow(WIN_NAME_C, imgCloud)
             cv2.imshow(WIN_NAME_B, img)
             if pf is not None:
