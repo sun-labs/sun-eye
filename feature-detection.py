@@ -56,7 +56,17 @@ def match_frames(f1, f2):
     img3 = cv2.drawMatches(img1,kp1,img2,kp2,matches[:], flags=2, outImg=img3)
     return img3
 
-def processClouds(img, frame, pc = None):
+def processClouds(img, frame, pc=None, pl=None):
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    ttype = cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU
+    ret, thresh = cv2.threshold(gray, 0, 255, ttype)
+    
+    kernel = np.ones((3,3), np.uint8)
+    opening = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=2)
+
+    return opening, None, None, None
+
+def processClouds_kmeans(img, frame, pc = None, pl = None):
     img = cv2.resize(img, (WIDTH, HEIGHT))
     
     # print(frame.pts)
@@ -64,10 +74,23 @@ def processClouds(img, frame, pc = None):
     #Z = pts.reshape(-1, 2)
     #Z = Z.flatten()
     # print(Z)
-    (ret, label, centroid) = cv2.kmeans(pts, 4, None, (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 5, 1.0), 5, cv2.KMEANS_RANDOM_CENTERS, centers=pc)
+    #print(pc, pl)
+    #print(len(pts), len(pl))
+    K = 4
+    flags = cv2.KMEANS_RANDOM_CENTERS
+    if pc is not None and pl is not None:
+      print(len(pc), len(pl), K, len(pts))
+    if pl is not None:
+        #flags = cv2.KMEANS_USE_INITIAL_LABELS
+        if len(pl) > len(pts):
+            pl = pl[:len(pts)]
+        else:
+            pl = np.pad(pl, len(pts), 'constant')
+
+    (ret, label, centroid) = cv2.kmeans(pts, K, None, (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 5, 1.0), 5, flags)
     centroid = np.uint8(centroid)
     res = centroid[label.flatten()]
-    # print(label)
+    print(centroid, len(centroid))
     for i1 in range(len(res)):
         p = pts[i1].flatten()
         color = COLORS[int(label[i1])]
@@ -75,21 +98,7 @@ def processClouds(img, frame, pc = None):
         u1, v1 = (int(round(p[0])), int(round(p[1])))
         cv2.circle(img, (u1, v1), 3, color)
 
-    return img, None, centroid
-    
-    Z = img.reshape((-1, 3))
-    Z = np.float32(Z)
-
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 5, 1.0)
-    K = 4
-    ret,label,center=cv2.kmeans(Z,K,None,criteria,5,cv2.KMEANS_RANDOM_CENTERS)
-    center = np.uint8(center)
-    res = center[label.flatten()]
-    res2 = res.reshape((img.shape))
-    return res2, None
-
-
-    return img, None
+    return img, None, centroid, label
 
 
 def initWindow():
@@ -108,12 +117,14 @@ if __name__ == "__main__":
     
     pf = None #previous frame
     pc = None #previous centroids kmeans
+    pl = None # previous kmeans labels
     while cap.isOpened():
         ret, frame = cap.read()
         if ret is True:
             img, cf = processImage(frame)
-            imgCloud, cfCloud, centroids = processClouds(frame, cf, pc)
+            imgCloud, cfCloud, centroids, labels = processClouds(frame, cf, pc, pl)
             pc = centroids
+            pl = labels
             cv2.imshow(WIN_NAME_C, imgCloud)
             cv2.imshow(WIN_NAME_B, img)
             if pf is not None:
