@@ -7,9 +7,9 @@ import sys
 
 WIDTH = 640 
 HEIGHT = 360
-WIN_NAME = 'image'
+WIN_NAME = 'time variant'
 WIN_NAME_B = 'features'
-WIN_NAME_C = 'clouds'
+WIN_NAME_C = 'cloud info'
 COLORS = [(128, 128, 0), (255, 0, 128), (0, 255, 255), (0, 255, 0)]
 
 class Frame():
@@ -30,6 +30,7 @@ class Frame():
 
 
 def processImage(img):
+    img = img.copy()
     frame = Frame(img)
     img = cv2.resize(img, (WIDTH, HEIGHT))
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -64,6 +65,10 @@ def processClouds(img, frame, pc=None, pl=None):
     kernel = np.ones((3,3), np.uint8)
     bimg = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=2)
 
+    pixels = bimg.flatten()
+    count = len(pixels)
+    white = len(pixels[pixels == 255])
+    cloudyness = white / count
     # img = cv2.Canny(bimg, 1, 1)
 
     contours,h = cv2.findContours(bimg, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
@@ -75,7 +80,9 @@ def processClouds(img, frame, pc=None, pl=None):
 
     clouds = len(list(filter(lambda x: len(x) > 30, contours)))
     font = cv2.FONT_HERSHEY_SIMPLEX
-    cv2.putText(img,str(clouds),(10,500), font, 4,(255,255,255),2,cv2.LINE_AA)
+    cv2.putText(img, '{} clouds'.format(clouds),(10,500), font, 4,(255,255,255),2,cv2.LINE_AA)
+    cv2.putText(img, '{}% cloudy'.format(round(cloudyness * 100)), (10, 300), font, 2, cv2.LINE_AA)
+    
     # img = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE, (0,0))
     # lines = cv2.HoughLines(opening, np.pi/180, 80, 30, 10)
 
@@ -164,6 +171,7 @@ if __name__ == "__main__":
         ret, frame = cap.read()
         if ret is True:
             img, cf = processImage(frame)
+            img = img.copy()
             imgCloud, cfCloud, centroids, labels = processClouds(frame, cf, pc, pl)
             pc = centroids
             pl = labels
