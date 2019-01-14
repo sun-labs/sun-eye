@@ -2,6 +2,16 @@
 Your everyday eye of the sun
 
 
+## Caclculate cloud height from relative humidity and temperature
+```
+h_clouds = height of clouds
+T_dp = dew point
+```
+![equation](http://www.sciweavers.org/tex2img.php?eq=T_{dp}=T-\frac{100-RH}{5}&bc=White&fc=Black&im=jpg&fs=12&ff=arev&edit=)
+
+![equation](http://www.sciweavers.org/tex2img.php?eq=h_{clouds}=\frac{T_{air}-T_{dp}}{0.00802}&bc=White&fc=Black&im=jpg&fs=12&ff=arev&edit=)
+
+
 ## Calculating width of viewport in meters
 ```
 c = altitude of clouds (m)
