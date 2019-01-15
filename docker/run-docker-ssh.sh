@@ -7,7 +7,7 @@ docker run \
     --runtime=nvidia \
     --net=host \
     --ipc=host \
-    -e DISPLAY=$DISPLAY \
+    -e DISPLAY=:0.0 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v /home/***REMOVED***/Development:/***REMOVED***/development \
     -v /sky/data:/***REMOVED***/data \
