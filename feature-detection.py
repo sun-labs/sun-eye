@@ -16,6 +16,26 @@ def parseFrame(frame):
     wintresh.imshow(cf.getTreshImage(cf.img))
     return cf
 
+def parseVideo(path):
+    cap = cv2.VideoCapture(args.file_path)
+    winm = Display('matches')
+    pf = None # previous frame
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if ret is True:
+            cf = parseFrame(frame)
+            if pf is not None:
+                matches = cf.matchWith(pf)
+                winm.drawMatches(cf, pf, matches)
+            pf = cf
+            cv2.waitKey(1)
+            frame = cap.read()[1]
+
+def parseImage(path):
+    frame = cv2.imread(path)
+    cf = parseFrame(frame)
+    cv2.waitKey(0)
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Process weather information from frame / video.')
@@ -30,21 +50,6 @@ if __name__ == "__main__":
 
     path = args.file_path
     if "mp4" in path:
-        cap = cv2.VideoCapture(args.file_path)
-        winm = Display('matches')
-        pf = None # previous frame
-        while cap.isOpened():
-            ret, frame = cap.read()
-            if ret is True:
-                cf = parseFrame(frame)
-                if pf is not None:
-                    matches = cf.matchWith(pf)
-                    winm.drawMatches(cf, pf, matches)
-                pf = cf
-                cv2.waitKey(1)
-                success, frame = cap.read()
-
+        parseVideo(path)
     else:
-        frame = cv2.imread(path)
-        cf = parseFrame(frame)
-        cv2.waitKey(0)
+        parseImage(path)
