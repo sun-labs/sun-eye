@@ -19,6 +19,42 @@ class Frame():
         self.kps = None
         self.ds = None
 
+    def getTreshImage(self, img):
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        ttype = cv2.THRESH_BINARY + cv2.THRESH_OTSU
+        ret, thresh = cv2.threshold(gray, 0, 255, ttype)
+
+        kernel = np.ones((3,3), np.uint8)
+        bimg = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=2)
+
+        return bimg
+
+    def getCloudsPercentage(self, img):
+        pixels = img.flatten()
+        count = len(pixels)
+        white = len(pixels[pixels == 255])
+        return white / count # done
+
+    def getContours(self, img):
+        return cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)[0]
+
+    def getCloudCount(self, img):
+        contours = self.getContours(img)
+        return len(list(filter(lambda x: len(x) > 30, contours)))
+
+    def getCloudsInformation(self):
+        bimg = self.getTreshImage(self.img)
+        cloudyness = self.getCloudsPercentage(bimg)
+        contours = self.getContours(bimg)
+        nClouds = self.getCloudCount(bimg)
+
+        return {
+            "cloudyness": cloudyness,
+            "contours": contours,
+            "cloudCount": nClouds
+        }
+
+
     def setPts(self, pts):
         self.pts = pts
 
@@ -58,79 +94,27 @@ def match_frames(f1, f2):
     return img3
 
 def processClouds(img, frame, pc=None, pl=None):
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    ttype = cv2.THRESH_BINARY + cv2.THRESH_OTSU
-    ret, thresh = cv2.threshold(gray, 0, 255, ttype)
 
-    kernel = np.ones((3,3), np.uint8)
-    bimg = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel, iterations=2)
-
-    pixels = bimg.flatten()
-    count = len(pixels)
-    white = len(pixels[pixels == 255])
-    cloudyness = white / count
-    # img = cv2.Canny(bimg, 1, 1)
-
-    contours,h = cv2.findContours(bimg, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-    for cnt in contours:
+    frame = frame or Frame(img)
+    info = frame.getCloudsInformation()
+    for cnt in info["contours"]:
         cv2.drawContours(img,[cnt],0,(0,0,255),2)
 
-
-   #  print(list(map(lambda x: len(x), contours)))
-
-    clouds = len(list(filter(lambda x: len(x) > 30, contours)))
     font = cv2.FONT_HERSHEY_SIMPLEX
-    cv2.putText(img, '{} clouds'.format(clouds),(10,500), font, 4,(255,255,255),2,cv2.LINE_AA)
-    cv2.putText(img, '{}% cloudy'.format(round(cloudyness * 100)), (10, 300), font, 2, cv2.LINE_AA)
-    
-    # img = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE, (0,0))
-    # lines = cv2.HoughLines(opening, np.pi/180, 80, 30, 10)
-
-    # if lines is not None:
-    #     for i1 in range(len(lines)):
-    #         x, y = lines[i1]
-    #         img = cv2.line(img, x, y, (255, 0, 0))
-
-    #img, contours, h = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    #markers = cv2.connectedComponents(opening)
-    #markers = cv2.watershed(img)
-
-    #sure_bg = cv2.dilate(opening, kernel, iterations=2)
-
-    #dist_transform = cv2.distanceTransform(opening, cv2.DIST_L2, 5)
-
-    #ret, sure_fg = cv2.threshold(dist_transform, 5, 255, cv2.THRESH_BINARY_INV)
-    #sure_fg = np.uint8(sure_fg)
-
-    #unknown = cv2.subtract(np.zeros(len(sure_fg)), sure_fg)
-
-    #ret, markers = cv2.connectedComponents(sure_fg)
-    #markers = markers+ 1
-    #markers[unknown == 255] = 0
-
-    # cv2.applyColorMap(markers, cv2.COLORMAP_AUTUMN)
-
-    #markers = cv2.watershed(img, markers)
-    # img[markers == -1] = [255, 128, 0]
+    cv2.putText(img, '{} clouds'.format(info["cloudCount"]),(10,500), font, 4,(255,255,255),2,cv2.LINE_AA)
+    cv2.putText(img, '{}% cloudy'.format(round(info["cloudyness"] * 100)), (10, 300), font, 2, cv2.LINE_AA)
 
     return img, None, None, None
 
 def processClouds_kmeans(img, frame, pc = None, pl = None):
     img = cv2.resize(img, (WIDTH, HEIGHT))
     
-    # print(frame.pts)
     pts = frame.pts
-    #Z = pts.reshape(-1, 2)
-    #Z = Z.flatten()
-    # print(Z)
-    #print(pc, pl)
-    #print(len(pts), len(pl))
     K = 4
     flags = cv2.KMEANS_RANDOM_CENTERS
     if pc is not None and pl is not None:
       print(len(pc), len(pl), K, len(pts))
     if pl is not None:
-        #flags = cv2.KMEANS_USE_INITIAL_LABELS
         if len(pl) > len(pts):
             pl = pl[:len(pts)]
         else:
