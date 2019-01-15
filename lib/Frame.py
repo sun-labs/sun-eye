@@ -61,21 +61,24 @@ class Frame():
 
     # find keypoints from one image to the next
     def matchWith(self, frame):
-        # Initiate SIFT detector
-        orb = cv2.ORB_create()
-        img1 = self.img.copy()
-        img2 = frame.img.copy()
-        kp1, des1 = orb.detectAndCompute(img1, None)
-        kp2, des2 = orb.detectAndCompute(img2, None)
+        if frame is not None:
+            # Initiate SIFT detector
+            orb = cv2.ORB_create()
+            img1 = self.img.copy()
+            img2 = frame.img.copy()
+            kp1, des1 = orb.detectAndCompute(img1, None)
+            kp2, des2 = orb.detectAndCompute(img2, None)
 
-        self.setKps(kp1)
-        self.setDes(des1)
-        frame.setKps(kp2)
-        frame.setDes(des2)
+            self.setKps(kp1)
+            self.setDes(des1)
+            frame.setKps(kp2)
+            frame.setDes(des2)
 
-        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-        self.lastMatches = bf.match(des1, des2)
-        return self.lastMatches
+            bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+            self.lastMatches = bf.match(des1, des2)
+            return self.lastMatches
+        else:
+            return np.array([])
 
 
 

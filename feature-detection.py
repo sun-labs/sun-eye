@@ -15,7 +15,7 @@ class SunEye():
         self.nogui = args.nogui
         self.pf = None # previous frame
         self.initGUI()
-        self.processFiles(args.file_path)
+        self.info = []
     
     def processFiles(self, files):
         for path in files:
@@ -24,6 +24,12 @@ class SunEye():
             else:
                 self.pf = self.handleImage(path)
                 cv2.waitKey(0)
+        return self.info
+
+    def addInfo(self, info):
+        print(info)
+        self.info.append(info)
+        return self.info
     
     def initGUI(self):
         if self.nogui is False:
@@ -33,9 +39,10 @@ class SunEye():
             self.wintresh = Display('tresh')
 
     def getFrameInfo(self, frame):
-        if self.pf is not None:
-            matches = frame.matchWith(self.pf)
-            cloudInfo = frame.getCloudsInformation()
+        info = frame.getCloudsInformation()
+        del info["contours"]
+        return info
+
 
     def drawFrame(self, frame, matches = None, pf = None):
         pf = self.pf if pf is None else pf # global previous frame if needed
@@ -50,33 +57,40 @@ class SunEye():
     def handleVideo(self, path):
         cap = cv2.VideoCapture(path)
         pf = None # previous frame
+        info = []
         while cap.isOpened():
             ret, frame = cap.read()
             if ret is True:
                 cf = Frame(frame)
                 self.drawFrame(cf, pf = pf)
-                    
+                info = self.getFrameInfo(cf)
+                self.addInfo(info)
                 pf = cf
-                cv2.waitKey(1)
+                if self.nogui is False:
+                    cv2.waitKey(1)
                 frame = cap.read()[1]
+            else:
+                break
         return pf
 
     def handleImage(self, path):
         frame = Frame(cv2.imread(path))
         self.drawFrame(frame)
-        return frame
+        info = self.getFrameInfo(frame)
+        self.addInfo(info)
+        return frame, self.getFrameInfo(frame)
 
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Process weather information from frame / video.')
-    parser.add_argument('file_path', metavar='FILE', type=str, nargs='+')
+    parser.add_argument('files', metavar='FILE', type=str, nargs='+')
     parser.add_argument('--atemp')
     parser.add_argument('--ahumid')
-    parser.add_argument('--nogui', default=False)
+    parser.add_argument('--nogui', action='store_true')
     args = parser.parse_args()
     
-    
     se = SunEye(args)
-    pf = None # previous frame
-    
+    info = se.processFiles(args.files)
+
+    print(info)
