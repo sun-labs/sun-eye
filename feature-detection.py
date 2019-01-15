@@ -97,66 +97,69 @@ class Frame():
     def setDes(self, des):
         self.des = des
 
+class Display():
 
-def drawTrackpoints(frame):
-    points = frame.getTrackPoints()
-    img = frame.img.copy()
-    for i1 in range(len(points)):
-        p = points[i1][0]
-        u1, v1 = int(round(p[0])), int(round(p[1]))
-        cv2.circle(img, (u1, v1), color=(0, 255, 0), radius=3)
+    def __init__(self, name, w = WIDTH, h = HEIGHT):
+        self.name = name
+        cv2.namedWindow(name, cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(name, w, h)
 
-    return img
-
-def drawMatches(f1, f2, matches):
-    img3 = None
-    return cv2.drawMatches(f1.img, f1.kps, f2.img, f2.kps, matches[:], flags=2, outImg=img3)
-
-def drawClouds(frame):
-
-    info = frame.getCloudsInformation()
-    img = frame.img.copy()
-    for cnt in info["contours"]:
-        cv2.drawContours(img,[cnt],0,(0,0,255),2)
-
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    cv2.putText(img, '{} clouds'.format(info["cloudCount"]), (10, 100), font, 1, cv2.LINE_AA)
-    cv2.putText(img, '{}% cloudy'.format(round(info["cloudyness"] * 100)), (10, 300), font, 2, cv2.LINE_AA)
-
-    return img
+    def imshow(self, img):
+        cv2.imshow(self.name, img)
 
 
-def initWindow():
-    cv2.namedWindow(WIN_NAME, cv2.WINDOW_NORMAL)
-    cv2.resizeWindow(WIN_NAME, WIDTH, HEIGHT)
-    cv2.namedWindow(WIN_NAME_B, cv2.WINDOW_NORMAL)
-    cv2.resizeWindow(WIN_NAME_B, WIDTH, HEIGHT)
-    cv2.namedWindow(WIN_NAME_C, cv2.WINDOW_NORMAL)
-    cv2.resizeWindow(WIN_NAME_C, WIDTH, HEIGHT)
+    def drawTrackpoints(self, frame):
+        points = frame.getTrackPoints()
+        img = frame.img.copy()
+        for i1 in range(len(points)):
+            p = points[i1][0]
+            u1, v1 = int(round(p[0])), int(round(p[1]))
+            cv2.circle(img, (u1, v1), color=(0, 255, 0), radius=3)
+
+        self.imshow(img)
+
+    def drawMatches(self, f1, f2, matches):
+        img3 = None
+        self.imshow(cv2.drawMatches(f1.img, f1.kps, f2.img, f2.kps, matches[:], flags=2, outImg=img3))
+
+    def drawClouds(self, frame):
+
+        info = frame.getCloudsInformation()
+        img = frame.img.copy()
+        for cnt in info["contours"]:
+            cv2.drawContours(img,[cnt],0,(0,0,255),2)
+
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        cv2.putText(img, '{} clouds'.format(info["cloudCount"]), (10, 100), font, 1, cv2.LINE_AA)
+        cv2.putText(img, '{}% cloudy'.format(round(info["cloudyness"] * 100)), (10, 300), font, 2, cv2.LINE_AA)
+
+        self.imshow(img)
 
 
 if __name__ == "__main__":
 
-    initWindow()
     cap = cv2.VideoCapture(sys.argv[1])
+
+    winf = Display('features')
+    winm = Display('matches')
+    wint = Display('trackers')
+    wintresh = Display('tresh')
     
     pf = None #previous frame
     while cap.isOpened():
         ret, frame = cap.read()
         if ret is True:
             cf = Frame(frame)
-            imgCloud = drawClouds(cf)
-            imgTrack = drawTrackpoints(cf)
+            winf.drawClouds(cf)
+            wint.drawTrackpoints(cf)
+            wintresh.imshow(cf.getTreshImage(cf.img))
 
             if pf is not None:
                 matches = cf.matchWith(pf)
-                imgMatch = drawMatches(cf, pf, matches)
-                cv2.imshow(WIN_NAME, imgMatch)
+                winm.drawMatches(cf, pf, matches)
 
-            cv2.imshow(WIN_NAME_C, imgCloud)
-            cv2.imshow(WIN_NAME_B, imgTrack)
-            
             pf = cf
+
             cv2.waitKey(1)
             success, frame = cap.read()
         else:
