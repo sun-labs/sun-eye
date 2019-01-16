@@ -4,6 +4,7 @@ Your everyday eye of the sun
 
 ## Caclculate cloud height from relative humidity and temperature
 ```
+T_x = Temperature of x
 h_clouds = height of clouds
 T_dp = dew point
 RH = relative humidity
