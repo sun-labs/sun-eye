@@ -62,7 +62,8 @@ RUN apt-get install x11-apps -y
 RUN apt-get install libcanberra-gtk-module -y
 RUN apt-get install libcanberra-gtk3-module -y
 
-RUN useradd -u 1001 -s /bin/bash ***REMOVED***
+RUN useradd -u 1001 -s /bin/bash -g sudo ***REMOVED***
+RUN echo "***REMOVED***:password" | chpasswd
 
 USER ***REMOVED***
 #
