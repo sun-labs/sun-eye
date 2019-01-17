@@ -5,6 +5,7 @@ from minio import Minio
 from minio.error import ResponseError
 import argparse
 import cv2
+import numpy as np
 
 def parseDate(dateStr):
     return tuple(dateStr.split("-"))
@@ -33,11 +34,23 @@ if __name__ == "__main__":
     for p in photos:
         paths = p.object_name.split('/')
         filename = paths[len(paths) - 1]
-        mc.fget_object(p.bucket_name, p.object_name, '{}/{}'.format(localPath, filename))
-        print(filename)
+        tempImg = '{}/{}'.format(localPath, filename)
+        if not os.path.isfile(tempImg):
+            mc.fget_object(p.bucket_name, p.object_name, tempImg)
+            print(filename)
+    print('done downloading.')
 
-    # print(dir(photos))
-    # for photo in photos:
-        # print(photo)
-    # print(len(photos))
-    # print(dir(buckets))
+
+    mimg = []
+
+    cv2.namedWindow('asdf')
+    images = os.listdir(localPath)
+    images.sort()
+    for img in images:
+        cv2.waitKey(1)
+        imgPath = "{}/{}".format(localPath, img)
+        img = cv2.imread(imgPath)
+        rimg = cv2.resize(img, (50, 25))
+        mimg.append(rimg.reshape(50 * 25, -1))
+        cv2.imshow('asdf', np.array(mimg))
+    cv2.waitKey(0)
