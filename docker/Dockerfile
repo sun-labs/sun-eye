@@ -65,7 +65,11 @@ RUN apt-get install libcanberra-gtk3-module -y
 RUN useradd -u 1001 -s /bin/bash -g sudo ***REMOVED***
 RUN echo "***REMOVED***:password" | chpasswd
 
+# PIP modules
+RUN pip3 install minio
+
 USER ***REMOVED***
+
 #
 # SSH SERVICE
 #
