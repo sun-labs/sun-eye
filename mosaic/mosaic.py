@@ -40,17 +40,30 @@ if __name__ == "__main__":
             print(filename)
     print('done downloading.')
 
-
-    mimg = []
-
     cv2.namedWindow('asdf')
     images = os.listdir(localPath)
     images.sort()
-    for img in images:
+    imgCount = len(images)
+
+    W = 50
+    H = 25
+    #mimg = np.arange(0, 50*25*imgCount*3).reshape(imgCount, 50*25, -1)
+    mimg = np.zeros((imgCount, W*H, 3))
+    # print(mimg)
+
+    for i in range(imgCount):
+        img = images[i]
         cv2.waitKey(1)
         imgPath = "{}/{}".format(localPath, img)
         img = cv2.imread(imgPath)
-        rimg = cv2.resize(img, (50, 25))
-        mimg.append(rimg.reshape(50 * 25, -1))
-        cv2.imshow('asdf', np.array(mimg))
-    cv2.waitKey(0)
+        rimg = cv2.resize(img, (W, H))
+        rimg = rimg.reshape(W*H, 3)
+        # print(len(rimg), len(mimg[i]))
+        mimg[i] = rimg
+        mimg[i, :, 0] = mimg[i, :, 0] / 255.0
+        mimg[i, :, 1] = mimg[i, :, 1] / 255.0
+        mimg[i, :, 2] = mimg[i, :, 2] / 255.0
+        
+        cv2.imshow('asdf', mimg)
+
+    cv2.waitKey(0) # last image
