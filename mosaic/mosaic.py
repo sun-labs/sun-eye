@@ -7,6 +7,7 @@ import argparse
 import cv2
 import numpy as np
 import math
+from datetime import timedelta, date
 
 def parseDate(dateStr):
     return tuple(dateStr.split("-"))
@@ -18,20 +19,12 @@ def convertToImage(arr):
     new[:, :, 2] = arr[:, :, 2] / 255.0
     return new
 
-if __name__ == "__main__":
+def daterange(start_date, end_date):
+    for n in range(int ((end_date - start_date).days) + 1):
+        yield start_date + timedelta(n)
 
-    parser = argparse.ArgumentParser(description='Generate mosaic from weather photos')
-    parser.add_argument('date', metavar='DATE', type=str)
-    parser.add_argument('--device-name', type=str)
-    parser.add_argument('--show-finish', action='store_true')
-    parser.add_argument('--show-progress', action='store_true')
-    args = parser.parse_args()
-    
-    mc = Minio('***REMOVED***',
-                  access_key='***REMOVED***',
-                  secret_key='***REMOVED***',
-                  secure=False)
-    date = args.date
+def createMosaic(date, args, mc):
+    print(date, args)
     y, m, d = parseDate(date)
 
     deviceName = args.device_name
@@ -48,11 +41,12 @@ if __name__ == "__main__":
         filename = paths[len(paths) - 1]
         tempImg = '{}/{}'.format(localPath, filename)
         if not os.path.isfile(tempImg):
+            print('dl [{}] ({}) {}'.format(deviceName, date, filename))
             mc.fget_object(p.bucket_name, p.object_name, tempImg)
-            print(filename)
     print('done downloading.')
 
-    cv2.namedWindow('asdf')
+    if args.show_progress is True or args.show_finish is True:
+        cv2.namedWindow('asdf')
     images = os.listdir(localPath)
     images.sort() # by filename
     imgCount = len(images)
@@ -60,24 +54,56 @@ if __name__ == "__main__":
     W = 50
     H = 25
     mimg = np.zeros((imgCount, W*H, 3))
-
-    print('mosaic in progress...')
-    for i in range(imgCount):
-        print('{}% {}/{}'.format(math.floor((i/imgCount)*100), i, imgCount))
-        img = images[i]
-        cv2.waitKey(1)
-        imgPath = "{}/{}".format(localPath, img)
-        img = cv2.imread(imgPath)
-        rimg = cv2.resize(img, (W, H))
-        rimg = rimg.reshape(W*H, 3)
-        mimg[i] = rimg
-        if args.show_progress == True:
+    saveAt = '{}/{}-{}.jpg'.format(savePath, deviceName, date)
+    if not os.path.isfile(saveAt) or args.force is True:
+        print('mosaic in progress...')
+        for i in range(imgCount):
+            print('{}% stitch {}'.format(math.floor((i/imgCount)*100), saveAt))
+            img = images[i]
+            cv2.waitKey(1)
+            imgPath = "{}/{}".format(localPath, img)
+            img = cv2.imread(imgPath)
+            rimg = cv2.resize(img, (W, H))
+            rimg = rimg.reshape(W*H, 3)
+            mimg[i] = rimg
+            if args.show_progress == True:
+                cv2.imshow('asdf', convertToImage(mimg))
+        
+        if args.show_finish == True:
             cv2.imshow('asdf', convertToImage(mimg))
+            cv2.waitKey(0) # last image
+
+        cv2.imwrite(saveAt, mimg, [cv2.IMWRITE_JPEG_QUALITY, 100])
+        print('mosaic done, saved in mosaics {}'.format(saveAt))
+
+    cv2.destroyAllWindows()
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(description='Generate mosaic from weather photos')
+    parser.add_argument('date', metavar='START_DATE', type=str)
+    parser.add_argument('--end-date', type=str, help='Iterate this date')
+    parser.add_argument('--device-name', type=str)
+    parser.add_argument('--show-finish', action='store_true')
+    parser.add_argument('--show-progress', action='store_true')
+    parser.add_argument('--force', action='store_true')
+    args = parser.parse_args()
     
-    if args.show_finish == True:
-        cv2.imshow('asdf', convertToImage(mimg))
-        cv2.waitKey(0) # last image
+    mc = Minio('***REMOVED***',
+                  access_key='***REMOVED***',
+                  secret_key='***REMOVED***',
+                  secure=False)
 
-    cv2.imwrite('{}/{}-{}.jpg'.format(savePath, deviceName, date), mimg, [cv2.IMWRITE_JPEG_QUALITY, 100])
-    print('mosaic done, saved in mosaics')
+    if args.end_date is not None: # range of dates
+        sy, sm, sd = parseDate(args.date)
+        ey, em, ed = parseDate(args.end_date)
+        start_date = date(int(sy), int(sm), int(sd))
+        end_date = date(int(ey), int(em), int(ed))
+        for single_date in daterange(start_date, end_date):
+            date = single_date.strftime("%Y-%m-%d")
+            createMosaic(date, args, mc)
+    else: # single day
+        createMosaic(args.date, args, mc)
 
+    exit()
+    
