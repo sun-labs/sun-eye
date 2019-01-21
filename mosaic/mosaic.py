@@ -11,13 +11,20 @@ import math
 def parseDate(dateStr):
     return tuple(dateStr.split("-"))
 
+def convertToImage(arr):
+    new = np.zeros(arr.shape)
+    new[:, :, 0] = arr[:, :, 0] / 255.0
+    new[:, :, 1] = arr[:, :, 1] / 255.0
+    new[:, :, 2] = arr[:, :, 2] / 255.0
+    return new
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Generate mosaic from weather photos')
-    #parser.add_argument('--date', type=str)
-    #parser.add_argument('--end', type=str)
     parser.add_argument('date', metavar='DATE', type=str)
     parser.add_argument('--device-name', type=str)
+    parser.add_argument('--show-finish', action='store_true')
+    parser.add_argument('--show-progress', action='store_true')
     args = parser.parse_args()
     
     mc = Minio('***REMOVED***',
@@ -47,14 +54,12 @@ if __name__ == "__main__":
 
     cv2.namedWindow('asdf')
     images = os.listdir(localPath)
-    images.sort()
+    images.sort() # by filename
     imgCount = len(images)
 
     W = 50
     H = 25
-    #mimg = np.arange(0, 50*25*imgCount*3).reshape(imgCount, 50*25, -1)
     mimg = np.zeros((imgCount, W*H, 3))
-    # print(mimg)
 
     print('mosaic in progress...')
     for i in range(imgCount):
@@ -65,15 +70,14 @@ if __name__ == "__main__":
         img = cv2.imread(imgPath)
         rimg = cv2.resize(img, (W, H))
         rimg = rimg.reshape(W*H, 3)
-        # print(len(rimg), len(mimg[i]))
         mimg[i] = rimg
-        mimg[i, :, 0] = mimg[i, :, 0] / 255.0
-        mimg[i, :, 1] = mimg[i, :, 1] / 255.0
-        mimg[i, :, 2] = mimg[i, :, 2] / 255.0
-        
-        # cv2.imshow('asdf', mimg)
+        if args.show_progress == True:
+            cv2.imshow('asdf', convertToImage(mimg))
+    
+    if args.show_finish == True:
+        cv2.imshow('asdf', convertToImage(mimg))
+        cv2.waitKey(0) # last image
 
-    cv2.imwrite('{}/{}-{}.jpg'.format(savePath, deviceName, date), mimg)
+    cv2.imwrite('{}/{}-{}.jpg'.format(savePath, deviceName, date), mimg, [cv2.IMWRITE_JPEG_QUALITY, 100])
     print('mosaic done, saved in mosaics')
-    cv2.waitKey(0) # last image
 
