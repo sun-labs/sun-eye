@@ -11,6 +11,7 @@ docker run \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v /home/***REMOVED***/Development:/***REMOVED***/development \
     -v /sky/data:/***REMOVED***/data \
-    ***REMOVED***/sun-eye-os
+    ***REMOVED***/sun-eye-os \
+    $1
 
 # -v /tmp/.X11-unix:/tmp/.X11-unix \
