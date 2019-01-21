@@ -1,8 +1,10 @@
 import cv2
 import numpy as np
+import os
 
 from lib.Frame import Frame
 from lib.Display import Display
+import lib.equations as eq
 
 class SunEye():
 
@@ -11,18 +13,30 @@ class SunEye():
         self.pf = None # previous frame
         self.initGUI()
         self.info = []
+        self.args = args
     
-    def processFiles(self, files):
+    def processFiles(self, files, cwd = ''):
         for path in files:
-            if "mp4" in path:
-                self.pf = self.handleVideo(path)
+            path = os.path.join(cwd, path)
+            if os.path.isfile(path):
+                self.pf = self.processFile(path)
             else:
-                self.pf = self.handleImage(path)
-                cv2.waitKey(0)
+                self.processFiles(self.getFilesFromDir(path), cwd = path)
         return self.info
 
+    def processFile(self, path):
+        if "mp4" in path:
+            return self.handleVideo(path)
+        else:
+            cv2.waitKey(1)
+            return self.handleImage(path)
+
+    def getFilesFromDir(self, path):
+        files = os.listdir(path)
+        files.sort()
+        return files
+
     def addInfo(self, info):
-        print(info)
         self.info.append(info)
         return self.info
     
@@ -73,4 +87,4 @@ class SunEye():
         self.drawFrame(frame)
         info = self.getFrameInfo(frame)
         self.addInfo(info)
-        return frame, self.getFrameInfo(frame)
+        return frame
