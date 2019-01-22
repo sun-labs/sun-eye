@@ -36,6 +36,7 @@ def createMosaic(date, args, mc):
     os.makedirs(localPath, exist_ok=True)
     os.makedirs(savePath, exist_ok=True)
     
+    # fetch images from minio
     photos = mc.list_objects_v2('***REMOVED***', mcPath)
     for p in photos:
         paths = p.object_name.split('/')
@@ -56,7 +57,9 @@ def createMosaic(date, args, mc):
     H = 25
     mimg = np.zeros((imgCount, W*H, 3))
     saveAt = '{}/{}-{}.jpg'.format(savePath, deviceName, date)
-    if not os.path.isfile(saveAt) or args.force is True:
+
+    # make mosaic
+    if (not os.path.isfile(saveAt) and imgCount > 0) or args.force is True:
         print('mosaic in progress...')
         for i in range(imgCount):
             print('{}% stitch {}'.format(math.floor((i/imgCount)*100), saveAt))
@@ -79,11 +82,15 @@ def createMosaic(date, args, mc):
         if mimg is not None:
             cv2.imwrite(saveAt, mimg, [cv2.IMWRITE_JPEG_QUALITY, 100])
             print('mosaic done, saved in mosaics {}'.format(saveAt))
+    else:
+        print("no images found, next..")
 
+    # upload to minio
     if not args.no_upload:
         if os.path.isfile(saveAt):
-            now = dt.now()
-            mfilename = '{:04d}-{:02d}-{:02d}'.format(now.year, now.month, now.day)
+            # now = dt.now()
+            # mfilename = '{:04d}-{:02d}-{:02d}'.format(now.year, now.month, now.day)
+            mfilename = date
             mpath = '{}/{}.jpg'.format(deviceName, mfilename)
             print('upload mosaic to minio bucket {}'.format(mpath))
             etag = mc.fput_object('sky-mosaics', mpath, saveAt)
