@@ -1,4 +1,0 @@
-python-pushover==0.3
-requests==2.18.4
-emoji==0.4.5
-websockets==4.0.1
