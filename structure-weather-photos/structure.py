@@ -3,6 +3,7 @@
 import argparse
 import os
 from datetime import datetime
+import shutil
 
 def creation_date(path_to_file):
     """
@@ -41,6 +42,9 @@ def handle_photo(path, args):
     filename = '{:02d}{:02d}{:02d}.{}'.format(date.hour, date.minute, date.second, ext)
     bucket_path = '{}/{:04d}/{:02d}/{:02d}'.format(args.device_name, date.year, date.month, date.day)
     file_path = '/mnt/data/***REMOVED***/{}'.format(bucket_path)
+    full_path = '{}/{}'.format(file_path, filename)
+    shutil.copy2(path, full_path)
+    print('{} -------> {}'.format(path, full_path))
 
     # os.makedirs(file_path, exist_ok=True)
     print(file_path)
