@@ -7,7 +7,7 @@ import argparse
 import cv2
 import numpy as np
 import math
-from datetime import timedelta, date
+from datetime import timedelta, date, datetime as dt
 
 def parseDate(dateStr):
     return tuple(dateStr.split("-"))
@@ -79,6 +79,17 @@ def createMosaic(date, args, mc):
         cv2.imwrite(saveAt, mimg, [cv2.IMWRITE_JPEG_QUALITY, 100])
         print('mosaic done, saved in mosaics {}'.format(saveAt))
 
+        if not args.no_upload:
+            now = dt.now()
+            mfilename = '{}-{}-{}'.format(now.year, now.month, now.day)
+            mpath = '{}/{}.jpg'.format(deviceName, mfilename)
+            print('upload mosaic to minio bucket {}'.format(mpath))
+            etag = mc.fput_object('sky-mosaics', mpath, saveAt)
+            if etag is not None:
+                print("upload sucessful!")
+            else:
+                print("failed upload..")
+
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
@@ -89,6 +100,7 @@ if __name__ == "__main__":
     parser.add_argument('--device-name', type=str)
     parser.add_argument('--show-finish', action='store_true')
     parser.add_argument('--show-progress', action='store_true')
+    parser.add_argument('--no-upload', action='store_true')
     parser.add_argument('--force', action='store_true')
     parser.add_argument('--output-dir', type=str)
     parser.add_argument('--temp-dir', type=str)
