@@ -29,7 +29,7 @@ def ts_to_str(ts):
 def unix_to_str(unixts):
     return ts_to_str(unix_to_ts(unixts))
 
-def handle_photo(path, args):
+def handle_photo(path, args, progress = None):
     # file extension from current path
     split = path.split('.')
     ext = split[len(split) - 1] 
@@ -41,32 +41,35 @@ def handle_photo(path, args):
     # filename from current path
     filename = '{:02d}{:02d}{:02d}.{}'.format(date.hour, date.minute, date.second, ext)
     bucket_path = '{}/{:04d}/{:02d}/{:02d}'.format(args.device_name, date.year, date.month, date.day)
-    file_path = '/mnt/data/***REMOVED***/{}'.format(bucket_path)
-    full_path = '{}/{}'.format(file_path, filename)
-    shutil.copy2(path, full_path)
-    print('{} -------> {}'.format(path, full_path))
+    file_path = os.path.join(args.output_folder, bucket_path)
+    full_path = os.path.join(file_path, filename)
 
-    # os.makedirs(file_path, exist_ok=True)
-    print(file_path)
+    if not os.path.isfile(full_path):
+        # copying and creation of folders
+        os.makedirs(file_path, exist_ok=True)
+        shutil.copy2(path, full_path)
+        print('[{}%] {} -------> {}'.format(progress, path, full_path))
+        return full_path
 
-    # print(cdate)
+    return None
 
 def handle_path(path, args):
     photos = os.listdir(path)
-    print("Found {} files / folders in {}, structuring...".format(len(photos), path))
-    for pname in photos:
+    nphotos = len(photos)
+    print("Found {} files / folders in {}, structuring...".format(nphotos, path))
+    for i in range(len(photos)):
+        pname = photos[i]
         ppath = os.path.join(path, pname) # full path to photo
+        progress = round((i/nphotos)*100)
         if os.path.isfile(ppath):
-            newpath = handle_photo(ppath, args) # if path is file
-            print(newpath)
+            newpath = handle_photo(ppath, args, progress=progress) # if path is file
         else:
             handle_path(ppath, args) # if path is folder
-        #print(unix_to_str(cdate))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Structure photos to Sun Eye specification')
     parser.add_argument('folders', metavar='FOLDER', type=str, nargs='+')
-    parser.add_argument('--output', type=str)
+    parser.add_argument('--output-folder', type=str, default='.')
     parser.add_argument('--device-name', type=str)
 
     args = parser.parse_args()
