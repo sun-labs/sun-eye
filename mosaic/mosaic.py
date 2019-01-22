@@ -24,7 +24,7 @@ def daterange(start_date, end_date):
         yield start_date + timedelta(n)
 
 def createMosaic(date, args, mc):
-    print(date, args)
+    print(args)
     y, m, d = parseDate(date)
 
     deviceName = args.device_name
@@ -64,6 +64,8 @@ def createMosaic(date, args, mc):
             cv2.waitKey(1)
             imgPath = "{}/{}".format(localPath, img)
             img = cv2.imread(imgPath)
+            if img is None or len(img) == 0:
+                continue
             rimg = cv2.resize(img, (W, H))
             rimg = rimg.reshape(W*H, 3)
             mimg[i] = rimg
