@@ -76,19 +76,23 @@ def createMosaic(date, args, mc):
             cv2.imshow('asdf', convertToImage(mimg))
             cv2.waitKey(0) # last image
 
-        cv2.imwrite(saveAt, mimg, [cv2.IMWRITE_JPEG_QUALITY, 100])
-        print('mosaic done, saved in mosaics {}'.format(saveAt))
+        if mimg is not None:
+            cv2.imwrite(saveAt, mimg, [cv2.IMWRITE_JPEG_QUALITY, 100])
+            print('mosaic done, saved in mosaics {}'.format(saveAt))
 
     if not args.no_upload:
-        now = dt.now()
-        mfilename = '{:04d}-{:02d}-{:02d}'.format(now.year, now.month, now.day)
-        mpath = '{}/{}.jpg'.format(deviceName, mfilename)
-        print('upload mosaic to minio bucket {}'.format(mpath))
-        etag = mc.fput_object('sky-mosaics', mpath, saveAt)
-        if etag is not None:
-            print("upload sucessful!")
+        if os.path.isfile(saveAt):
+            now = dt.now()
+            mfilename = '{:04d}-{:02d}-{:02d}'.format(now.year, now.month, now.day)
+            mpath = '{}/{}.jpg'.format(deviceName, mfilename)
+            print('upload mosaic to minio bucket {}'.format(mpath))
+            etag = mc.fput_object('sky-mosaics', mpath, saveAt)
+            if etag is not None:
+                print("upload sucessful!")
+            else:
+                print("failed upload..")
         else:
-            print("failed upload..")
+            print("no mosaic to upload at {}".format(saveAt))
 
     cv2.destroyAllWindows()
 
