@@ -10,5 +10,6 @@
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v /home/***REMOVED***/Development:/***REMOVED***/development \
     -v /sky/data:/***REMOVED***/data \
+    -v /tmp:/tmp \
     ***REMOVED***/sun-eye-os \
     $1
