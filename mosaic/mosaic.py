@@ -81,7 +81,7 @@ def createMosaic(date, args, mc):
 
     if not args.no_upload:
         now = dt.now()
-        mfilename = '{}-{}-{}'.format(now.year, now.month, now.day)
+        mfilename = '{:04d}-{:02d}-{:02d}'.format(now.year, now.month, now.day)
         mpath = '{}/{}.jpg'.format(deviceName, mfilename)
         print('upload mosaic to minio bucket {}'.format(mpath))
         etag = mc.fput_object('sky-mosaics', mpath, saveAt)
