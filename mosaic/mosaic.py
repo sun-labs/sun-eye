@@ -28,8 +28,9 @@ def createMosaic(date, args, mc):
     y, m, d = parseDate(date)
 
     deviceName = args.device_name
-    localPath = './temp/{}-{}'.format(deviceName, date)
-    savePath = './mosaics'
+    localPath = args.temp_dir if args.temp_dir is not None else './temp'
+    localPath = '{}/{}-{}'.format(localPath, deviceName, date)
+    savePath = args.output_dir if args.output_dir is not None else './mosaics'
     mcPath = '/{}/{}/{}/{}/'.format(deviceName, y, m, d)
 
     os.makedirs(localPath, exist_ok=True)
@@ -87,6 +88,8 @@ if __name__ == "__main__":
     parser.add_argument('--show-finish', action='store_true')
     parser.add_argument('--show-progress', action='store_true')
     parser.add_argument('--force', action='store_true')
+    parser.add_argument('--output-dir', type=str)
+    parser.add_argument('--temp-dir', type=str)
     args = parser.parse_args()
     
     mc = Minio('***REMOVED***',
