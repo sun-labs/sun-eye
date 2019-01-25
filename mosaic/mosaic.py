@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import sys, os
+import minio
+import shutil
 from minio import Minio
 from minio.error import ResponseError
 import argparse
@@ -32,6 +34,21 @@ def createMosaic(date, args, mc):
     localPath = '{}/{}-{}'.format(localPath, deviceName, date)
     savePath = args.output_dir if args.output_dir is not None else './mosaics'
     mcPath = '/{}/{}/{}/{}/'.format(deviceName, y, m, d)
+    mpath = '{}/{}.jpg'.format(deviceName, date)
+
+    # before doing all the hassle of downloading stuff
+    # check if mosaic already available
+    minioMosaic = None
+    if args.no_upload is False:
+        print("checking if mosaic exists")
+        try:
+            minioMosaic = mc.stat_object('sky-mosaics', mpath)
+        except minio.error.NoSuchKey:
+            print("no mosaic in bucket, continuing..")
+
+        if minioMosaic is not None and args.force is False: # already exists skip
+            print("SKIP mosaic already exists in bucket, NEXT.")
+            return
 
     os.makedirs(localPath, exist_ok=True)
     os.makedirs(savePath, exist_ok=True)
@@ -85,19 +102,23 @@ def createMosaic(date, args, mc):
     else:
         print("no images found, next..")
 
+    if args.save_temp is False:
+        print("time to clean up")
+        shutil.rmtree(localPath)
+
     # upload to minio
     if not args.no_upload:
         if os.path.isfile(saveAt):
-            # now = dt.now()
-            # mfilename = '{:04d}-{:02d}-{:02d}'.format(now.year, now.month, now.day)
             mfilename = date
-            mpath = '{}/{}.jpg'.format(deviceName, mfilename)
-            print('upload mosaic to minio bucket {}'.format(mpath))
-            etag = mc.fput_object('sky-mosaics', mpath, saveAt)
-            if etag is not None:
-                print("upload sucessful!")
+            if minioMosaic is None or args.force is True:
+                print('upload mosaic to minio bucket {}'.format(mpath))
+                etag = mc.fput_object('sky-mosaics', mpath, saveAt)
+                if etag is not None:
+                    print("upload sucessful!")
+                else:
+                    print("failed upload..")
             else:
-                print("failed upload..")
+                print("[SKIP] {} already exists in bucket.".format(mpath))
         else:
             print("no mosaic to upload at {}".format(saveAt))
 
@@ -111,6 +132,7 @@ if __name__ == "__main__":
     parser.add_argument('--device-name', type=str)
     parser.add_argument('--show-finish', action='store_true')
     parser.add_argument('--show-progress', action='store_true')
+    parser.add_argument('--save-temp', action='store_true')
     parser.add_argument('--no-upload', action='store_true')
     parser.add_argument('--force', action='store_true')
     parser.add_argument('--output-dir', type=str)
