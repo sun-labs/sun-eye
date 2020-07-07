@@ -1,8 +1,26 @@
-# sun-eye
-Your everyday eye of the sun
+# Sun Eye
+Collection of Machine Learning algorithms used for hyperlocal weather prediction
 
+Each folder contains a different project
 
-## Caclculate cloud height from relative humidity and temperature
+## How to use
+
+- Install requirements.txt in each project before running with `pip install -r requirements.txt`
+
+## :cloud: Feature Detection
+Analyze clouds and cloudiness of a stream of images or a video.
+ - Returns number of clouds and cloudiness factor in JSON format
+ - Supports MP4 and static images (JPEG, PNG).
+ - Hypnotizing visualizations during analysis
+
+## :bento: Mosaic Generator
+Convert multiple images into one image
+ - Used for training Convolutional Neural Nets
+ - Mesmerizing images, put it on your wall. wow.
+
+## Algorithms
+
+### Caclculate cloud height from relative humidity and temperature
 ```
 T_x = Temperature of x
 h_clouds = height of clouds
@@ -14,7 +32,7 @@ RH = relative humidity
 ![eq-height](https://latex.codecogs.com/svg.latex?\Large&space;h_{clouds}=\frac{T_{air}-T_{dp}}{0.00802})
 
 
-## Calculating width of viewport in meters
+### Calculating width of viewport in meters
 ```
 c = altitude of clouds (m)
 z = width of viewport at clouds altitude (m)
