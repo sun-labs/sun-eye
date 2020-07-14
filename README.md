@@ -1,5 +1,5 @@
 # Sun Eye
-Collection of Machine Learning algorithms used for hyperlocal weather prediction
+Collection of Machine Learning algorithms and tools used for hyperlocal weather prediction
 
 Each folder contains a different project
 
