@@ -1,10 +1,10 @@
-import React, { Component } from 'react';
-import './App.css';
+import React, { Component } from 'react'
+import './App.css'
 
 const Minio = require('minio')
 
 class App extends Component {
-  constructor() {
+  constructor () {
     super()
     this.state = {
       mc: undefined,
@@ -13,12 +13,14 @@ class App extends Component {
       sampleTime: 15000
     }
   }
-  getImageUrl(record) {
+
+  getImageUrl (record) {
     // ***REMOVED***
     const { path } = this.getRecordInfo(record)
     return `http://***REMOVED***/***REMOVED***/${path}`
   }
-  getRecordInfo(record) {
+
+  getRecordInfo (record) {
     const path = unescape(record.s3.object.key)
     const deviceName = path.split('/')[0]
     return {
@@ -26,7 +28,8 @@ class App extends Component {
       deviceName
     }
   }
-  componentWillMount() {
+
+  componentWillMount () {
     const mc = new Minio.Client({
       endPoint: '***REMOVED***',
       port: 9000,
@@ -35,7 +38,7 @@ class App extends Component {
       secretKey: '***REMOVED***'
     })
 
-    let poller = mc.listenBucketNotification('***REMOVED***', '', '', ['s3:ObjectCreated:*'])
+    const poller = mc.listenBucketNotification('***REMOVED***', '', '', ['s3:ObjectCreated:*'])
     poller.on('notification', record => {
       const { deviceName } = this.getRecordInfo(record)
       this.setState({
@@ -50,30 +53,36 @@ class App extends Component {
     })
     this.setState({ mc })
   }
-  formatDate(dateString) {
+
+  formatDate (dateString) {
     const date = new Date(dateString)
     const options = { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' }
     return date.toLocaleDateString('sv-SE', options)
   }
-  render() {
+
+  render () {
     const devices = Object.keys(this.state.records).sort()
     return (
-      <div className="app">
-        { devices.map((deviceName) => {
+      <div className='app'>
+        {devices.map((deviceName) => {
           const record = this.state.records[deviceName]
           const imageSrc = this.getImageUrl(record)
-          return <div key={imageSrc} className="device-photo" style={{
-            backgroundImage: `url('${imageSrc}')`,
-          }}>
-            <div className='title-wrapper'>
-              <p className='title'>{ deviceName }</p>
-              <p className='timestamp'>{ this.formatDate(record.eventTime) }</p>
+          return (
+            <div
+              key={imageSrc} className='device-photo' style={{
+                backgroundImage: `url('${imageSrc}')`
+              }}
+            >
+              <div className='title-wrapper'>
+                <p className='title'>{deviceName}</p>
+                <p className='timestamp'>{this.formatDate(record.eventTime)}</p>
+              </div>
             </div>
-            </div>
+          )
         })}
       </div>
-    );
+    )
   }
 }
 
-export default App;
+export default App
