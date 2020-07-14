@@ -84,7 +84,7 @@ def createMosaic(args = None, mc = None, date = None, input=None):
         if args.no_upload is False:
             print("checking if mosaic exists")
             try:
-                minioMosaic = mc.stat_object('sky-mosaics', mpath)
+                minioMosaic = mc.stat_object('***REMOVED***', mpath)
             except minio.error.NoSuchKey:
                 print("no mosaic in bucket, continuing..")
 
@@ -97,7 +97,7 @@ def createMosaic(args = None, mc = None, date = None, input=None):
     
     if input is None:
         # fetch images from minio
-        photos = mc.list_objects_v2('sky-photos', mcPath)
+        photos = mc.list_objects_v2('***REMOVED***', mcPath)
         for p in photos:
             paths = p.object_name.split('/')
             filename = paths[len(paths) - 1]
@@ -142,7 +142,7 @@ def createMosaic(args = None, mc = None, date = None, input=None):
             mfilename = date
             if minioMosaic is None or args.force is True:
                 print('upload mosaic to minio bucket {}'.format(mpath))
-                etag = mc.fput_object('sky-mosaics', mpath, saveAt)
+                etag = mc.fput_object('***REMOVED***', mpath, saveAt)
                 if etag is not None:
                     print("upload sucessful!")
                 else:
