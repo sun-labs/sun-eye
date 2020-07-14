@@ -19,9 +19,11 @@ Analyze clouds and cloudiness from a stream of images or video.
 ## :bento: Mosaic Generator
 
 Convert a time lapsed image collection
+
 ![Preview of Feature Detection](docs/assets/mosaic-before.png)
 
 Into a single image strip that contains the complete time lapse
+
 ![Preview of Feature Detection](docs/assets/mosaic-result.png)
 
  - Used for training Convolutional Neural Nets
