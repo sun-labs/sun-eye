@@ -3,8 +3,8 @@
 /usr/bin/docker run \
     --rm \
     --runtime=nvidia \
-    -v /home/***REMOVED***/Development:/***REMOVED***/development \
-    -v /sky/data:/***REMOVED***/data \
+    -v /home/username/Development:/**REMOVED**/development \
+    -v /**REMOVED**/data:/**REMOVED**/data \
     -v /tmp:/tmp \
-    ***REMOVED***/sun-eye-os \
+    **REMOVED**/sun-eye-os \
     $1

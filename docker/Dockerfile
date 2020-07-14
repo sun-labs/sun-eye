@@ -1,6 +1,6 @@
 FROM nvcr.io/nvidia/cuda:9.0-devel-ubuntu16.04
 
-WORKDIR /***REMOVED***
+WORKDIR /directory
 
 #
 # OPENCV + CUDA SUPPORT
@@ -46,7 +46,7 @@ RUN cmake -D CMAKE_BUILD_TYPE=RELEASE \
     -D CUDA_FAST_MATH=1 \
     -D CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda \
 	-D OPENCV_ENABLE_NONFREE=ON \
-	-D OPENCV_EXTRA_MODULES_PATH=/***REMOVED***/opencv_contrib/modules \
+	-D OPENCV_EXTRA_MODULES_PATH=/directory/opencv_contrib/modules \
 	-D PYTHON_EXECUTABLE=/usr/bin/python3 \
 	-D BUILD_EXAMPLES=ON ..
 
@@ -62,13 +62,13 @@ RUN apt-get install x11-apps -y
 RUN apt-get install libcanberra-gtk-module -y
 RUN apt-get install libcanberra-gtk3-module -y
 
-RUN useradd -u 1001 -s /bin/bash -g sudo ***REMOVED***
-RUN echo "***REMOVED***:password" | chpasswd
+RUN useradd -u 1001 -s /bin/bash -g sudo username
+RUN echo "username:password" | chpasswd
 
 # PIP modules
 RUN pip3 install minio
 
-USER ***REMOVED***
+USER username
 
-WORKDIR /***REMOVED***/development/
+WORKDIR /directory/development/
 CMD NO_AT_BRIDGE=1 tmux

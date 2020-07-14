@@ -1,2 +1,2 @@
 #!/bin/bash
-docker build -t ***REMOVED***/sun-eye-os .
+docker build -t **REMOVED**/sun-eye-os .

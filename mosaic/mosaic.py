@@ -54,7 +54,7 @@ def createMosaic(date, args, mc):
     os.makedirs(savePath, exist_ok=True)
     
     # fetch images from minio
-    photos = mc.list_objects_v2('***REMOVED***', mcPath)
+    photos = mc.list_objects_v2('sky-photos', mcPath)
     for p in photos:
         paths = p.object_name.split('/')
         filename = paths[len(paths) - 1]

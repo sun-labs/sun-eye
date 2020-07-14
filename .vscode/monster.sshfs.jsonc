@@ -5,10 +5,10 @@
     - Change username and root accordingly
 */
 {
-    "label": "***REMOVED***",
-    "root": "/home/***REMOVED***/Development/sun-eye",
+    "label": "**REMOVED**",
+    "root": "/home/**REMOVED**/Development/sun-eye",
     "host": "localhost",
     "port": 9865,
-    "username": "***REMOVED***",
+    "username": "**REMOVED**",
     "password": true
 }

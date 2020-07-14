@@ -5,20 +5,20 @@ import sys, os
 from minio import Minio
 from minio.error import ResponseError
 
-minioClient = Minio('***REMOVED***',
-                  access_key='***REMOVED***',
-                  secret_key='***REMOVED***',
+minioClient = Minio('**REMOVED**',
+                  access_key='**REMOVED**',
+                  secret_key='**REMOVED**',
                   secure=False)
 
 
-DOWNLOAD_LOCATION_PATH = os.path.expanduser("~") + "***REMOVED***"
+DOWNLOAD_LOCATION_PATH = os.path.expanduser("~") + "**REMOVED**"
 if not os.path.exists(DOWNLOAD_LOCATION_PATH):
 	print ("Making download directory")
 	os.mkdir(DOWNLOAD_LOCATION_PATH)
 
 
 def backup_s3_folder():
-	BUCKET_NAME = "***REMOVED***"
+	BUCKET_NAME = "**REMOVED**"
 	# AWS_ACCESS_KEY_ID= os.getenv("AWS_KEY_ID") # set your AWS_KEY_ID  on your environment path
 	# AWS_ACCESS_SECRET_KEY = os.getenv("AWS_ACCESS_KEY") # set your AWS_ACCESS_KEY  on your environment path
 	bucket = minioClient.list_objects(BUCKET_NAME, recursive=True)

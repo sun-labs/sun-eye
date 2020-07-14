@@ -8,8 +8,8 @@
     --ipc=host \
     -e DISPLAY=$DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
-    -v /home/***REMOVED***/Development:/***REMOVED***/development \
-    -v /sky/data:/***REMOVED***/data \
+    -v /home/username/Development:/**REMOVED**/development \
+    -v /**REMOVED**/data:/**REMOVED**/data \
     -v /tmp:/tmp \
-    ***REMOVED***/sun-eye-os \
+    **REMOVED**/sun-eye-os \
     $1

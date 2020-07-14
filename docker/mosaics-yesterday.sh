@@ -1,5 +1,5 @@
 #!/bin/bash
 
-/home/***REMOVED***/Development/sun-eye/docker/run-cron-docker.sh "/***REMOVED***/development/sun-eye/mosaic/mosaic.py --device-name ***REMOVED*** --output-dir /***REMOVED***/development/sun-eye/mosaic/mosaics --temp-dir /***REMOVED***/development/sun-eye/mosaic/temp $(date +%Y-%m-%d -d "yesterday")"
-/home/***REMOVED***/Development/sun-eye/docker/run-cron-docker.sh "/***REMOVED***/development/sun-eye/mosaic/mosaic.py --device-name ***REMOVED*** --output-dir /***REMOVED***/development/sun-eye/mosaic/mosaics --temp-dir /***REMOVED***/development/sun-eye/mosaic/temp $(date +%Y-%m-%d -d "yesterday")"
-/home/***REMOVED***/Development/sun-eye/docker/run-cron-docker.sh "/***REMOVED***/development/sun-eye/mosaic/mosaic.py --device-name ***REMOVED*** --output-dir /***REMOVED***/development/sun-eye/mosaic/mosaics --temp-dir /***REMOVED***/development/sun-eye/mosaic/temp $(date +%Y-%m-%d -d "yesterday")"
+/home/username/Development/sun-eye/docker/run-cron-docker.sh "/directory/development/sun-eye/mosaic/mosaic.py --device-name **REMOVED** --output-dir /directory/development/sun-eye/mosaic/mosaics --temp-dir /directory/development/sun-eye/mosaic/temp $(date +%Y-%m-%d -d "yesterday")"
+/home/username/Development/sun-eye/docker/run-cron-docker.sh "/directory/development/sun-eye/mosaic/mosaic.py --device-name **REMOVED** --output-dir /directory/development/sun-eye/mosaic/mosaics --temp-dir /directory/development/sun-eye/mosaic/temp $(date +%Y-%m-%d -d "yesterday")"
+/home/username/Development/sun-eye/docker/run-cron-docker.sh "/directory/development/sun-eye/mosaic/mosaic.py --device-name **REMOVED** --output-dir /directory/development/sun-eye/mosaic/mosaics --temp-dir /directory/development/sun-eye/mosaic/temp $(date +%Y-%m-%d -d "yesterday")"
