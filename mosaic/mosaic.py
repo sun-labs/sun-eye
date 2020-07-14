@@ -139,9 +139,9 @@ if __name__ == "__main__":
     parser.add_argument('--temp-dir', type=str)
     args = parser.parse_args()
     
-    mc = Minio('***REMOVED***',
-                  access_key='***REMOVED***',
-                  secret_key='***REMOVED***',
+    mc = Minio('**MINIO_HOST**',
+                  access_key='**REMOVED**',
+                  secret_key='**REMOVED**',
                   secure=False)
 
     if args.end_date is not None: # range of dates

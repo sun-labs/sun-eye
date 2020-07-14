@@ -15,9 +15,8 @@ class App extends Component {
   }
 
   getImageUrl (record) {
-    // ***REMOVED***
     const { path } = this.getRecordInfo(record)
-    return `http://***REMOVED***/***REMOVED***/${path}`
+    return `http://**REMOVED**/${path}`
   }
 
   getRecordInfo (record) {
@@ -31,14 +30,14 @@ class App extends Component {
 
   componentWillMount () {
     const mc = new Minio.Client({
-      endPoint: '***REMOVED***',
+      endPoint: '**REMOVED**',
       port: 9000,
       useSSL: false,
-      accessKey: '***REMOVED***',
-      secretKey: '***REMOVED***'
+      accessKey: '**REMOVED**',
+      secretKey: '**REMOVED**'
     })
 
-    const poller = mc.listenBucketNotification('***REMOVED***', '', '', ['s3:ObjectCreated:*'])
+    const poller = mc.listenBucketNotification('**REMOVED**', '', '', ['s3:ObjectCreated:*'])
     poller.on('notification', record => {
       const { deviceName } = this.getRecordInfo(record)
       this.setState({

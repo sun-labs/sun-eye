@@ -170,9 +170,9 @@ if __name__ == "__main__":
     parser.add_argument('--temp-dir', type=str)
     args = parser.parse_args()
     
-    mc = Minio('***REMOVED***',
-                  access_key='***REMOVED***',
-                  secret_key='***REMOVED***',
+    mc = Minio('**HOST**',
+                  access_key='**REMOVED**',
+                  secret_key='**REMOVED**',
                   secure=False)
 
     if args.input is None:
